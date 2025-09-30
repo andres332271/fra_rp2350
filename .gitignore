@@ -1,0 +1,33 @@
+# Build directory
+build/
+
+# Config with credentials (never commit this!)
+src/config.h
+
+# IDE files
+.vscode/
+.idea/
+
+# Compiled binaries
+*.elf
+*.bin
+*.hex
+*.uf2
+*.map
+*.o
+*.d
+
+# Temporary files
+*~
+*.swp
+*.swo
+
+# CMake
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+
+# Debug files
+*.dmp
+*.dis
