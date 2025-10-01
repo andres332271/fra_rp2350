@@ -31,18 +31,18 @@ print_error() {
 if [ -z "$PICO_SDK_PATH" ]; then
   print_error "PICO_SDK_PATH no está definido"
   print_info "Agregar a ~/.bashrc:"
-  print_info "  export PICO_SDK_PATH=~/pico-sdk"
+  print_info "  export PICO_SDK_PATH=/home/andres/repositorios/3rd-party/pico-sdk"
   exit 1
 fi
 
 print_info "PICO_SDK_PATH: $PICO_SDK_PATH"
 
 # Verificar que config.h existe
-if [ ! -f "src/config.h" ]; then
-  print_error "src/config.h no existe"
+if [ ! -f "include/config.h" ]; then
+  print_error "include/config.h no existe"
   print_info "Crear desde template:"
-  print_info "  cp config.h.example src/config.h"
-  print_info "  nano src/config.h"
+  print_info "  cp config.h.example include/config.h"
+  print_info "  nano include/config.h"
   exit 1
 fi
 
@@ -62,7 +62,7 @@ build_project() {
   fi
 
   cd "$BUILD_DIR"
-  cmake .. || {
+  cmake -DPICO_BOARD=pico2_w .. || {
     print_error "CMake falló"
     exit 1
   }

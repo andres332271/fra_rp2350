@@ -70,6 +70,6 @@ bool mqtt_reconnect(void);
 /**
  * @brief Desconecta del broker MQTT limpiamente
  */
-void mqtt_disconnect(void);
+void fra_mqtt_disconnect(void);
 
 #endif // MQTT_CLIENT_H

@@ -89,7 +89,7 @@ bool mqtt_reconnect(void) {
     return true;
 }
 
-void mqtt_disconnect(void) {
+void fra_mqtt_disconnect(void) {
     printf("[MQTT] Desconectando... (STUB)\n");
     
     // TODO: Implementar desconexión limpia

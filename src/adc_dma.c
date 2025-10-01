@@ -8,6 +8,7 @@
 
 #include "adc_dma.h"
 #include <stdio.h>
+#include <math.h>
 #include "hardware/adc.h"
 #include "hardware/dma.h"
 #include "hardware/gpio.h"

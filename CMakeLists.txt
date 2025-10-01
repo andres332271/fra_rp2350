@@ -3,6 +3,9 @@ cmake_minimum_required(VERSION 3.13)
 # Pull in SDK (must be before project)
 include(pico_sdk_import.cmake)
 
+# Define board
+set(PICO_BOARD pico2_w CACHE STRING "Board type")
+
 project(fra_rp2350 C CXX ASM)
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 17)
@@ -19,6 +22,9 @@ add_executable(fra_rp2350
     src/mqtt_client.c
     src/sweep.c
 )
+
+# Include
+target_include_directories(fra_rp2350 PRIVATE ${CMAKE_CURRENT_LIST_DIR}/include)
 
 # Pull in common dependencies
 target_link_libraries(fra_rp2350
