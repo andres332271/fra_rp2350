@@ -15,11 +15,11 @@
 // CONFIGURACIÓN WiFi
 // ============================================================================
 
-#define WIFI_SSID "Galaxy A5152B7"
-#define WIFI_PASSWORD "5gj7e3bh"
+#define WIFI_SSID "Fibertel WiFi316 2.4GHz"
+#define WIFI_PASSWORD "0146198437"
 
 // Timeout de conexión WiFi en milisegundos
-#define WIFI_CONNECT_TIMEOUT_MS 10000
+#define WIFI_CONNECT_TIMEOUT_MS 20000
 
 // ============================================================================
 // CONFIGURACIÓN MQTT

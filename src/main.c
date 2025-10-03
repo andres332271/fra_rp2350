@@ -43,15 +43,22 @@ static bool init_hardware(void) {
     DEBUG_PRINT(2, "[INIT] FRA RP2350 v1.0\n");
     DEBUG_PRINT(2, "[INIT] Compilado: %s %s\n", __DATE__, __TIME__);
     
-    // Inicializar WiFi/Bluetooth
-    DEBUG_PRINT(2, "[INIT] Inicializando CYW43...\n");
-    if (cyw43_arch_init()) {
+    // Inicializar WiFi con configuración de país mundial
+    DEBUG_PRINT(2, "[INIT] Inicializando CYW43 con configuración mundial...\n");
+    if (cyw43_arch_init_with_country(CYW43_COUNTRY_WORLDWIDE)) {
         DEBUG_PRINT(0, "[ERROR] Fallo al inicializar WiFi\n");
         return false;
     }
     
+    // Dar más tiempo al chip para estabilizarse
+    DEBUG_PRINT(2, "[INIT] CYW43 inicializado, esperando estabilización...\n");
+    sleep_ms(1000);
+    
     cyw43_arch_enable_sta_mode();
     DEBUG_PRINT(2, "[INIT] WiFi habilitado en modo estación\n");
+    
+    // Delay adicional después de habilitar modo estación
+    sleep_ms(500);
     
     // Inicializar GPIO de debug si está habilitado
 #ifdef DEBUG_GPIO_ENABLED
@@ -80,32 +87,55 @@ static bool init_hardware(void) {
  * @return true si la conexión fue exitosa, false en caso contrario
  */
 static bool connect_wifi(void) {
-    DEBUG_PRINT(2, "[WIFI] Conectando a SSID: %s\n", WIFI_SSID);
+    const int max_attempts = 3;
     
-    uint32_t start_time = to_ms_since_boot(get_absolute_time());
-    
-    int result = cyw43_arch_wifi_connect_timeout_ms(
-        WIFI_SSID,
-        WIFI_PASSWORD,
-        CYW43_AUTH_WPA2_AES_PSK,
-        WIFI_CONNECT_TIMEOUT_MS
-    );
-    
-    if (result != 0) {
-        DEBUG_PRINT(0, "[ERROR] WiFi connect failed: %d\n", result);
-        return false;
+    for (int attempt = 1; attempt <= max_attempts; attempt++) {
+        DEBUG_PRINT(2, "[WIFI] Intento %d/%d - Conectando a SSID: %s\n", 
+                    attempt, max_attempts, WIFI_SSID);
+        
+        uint32_t start_time = to_ms_since_boot(get_absolute_time());
+        
+        int result = cyw43_arch_wifi_connect_timeout_ms(
+            WIFI_SSID,
+            WIFI_PASSWORD,
+            CYW43_AUTH_WPA2_AES_PSK,
+            WIFI_CONNECT_TIMEOUT_MS
+        );
+        
+        uint32_t elapsed = to_ms_since_boot(get_absolute_time()) - start_time;
+        
+        if (result == 0) {
+            // Conexión exitosa
+            DEBUG_PRINT(2, "[WIFI] Conectado exitosamente en %lu ms\n", elapsed);
+            
+            uint8_t mac[6];
+            cyw43_wifi_get_mac(&cyw43_state, CYW43_ITF_STA, mac);
+            DEBUG_PRINT(2, "[WIFI] MAC: %02X:%02X:%02X:%02X:%02X:%02X\n",
+                        mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+            
+            return true;
+        }
+        
+        // Diagnosticar el error específico
+        const char* error_msg;
+        switch(result) {
+            case -1: error_msg = "LINK_FAIL (generic failure)"; break;
+            case -2: error_msg = "LINK_NONET (network not found)"; break;
+            case -3: error_msg = "LINK_BADAUTH (authentication failed)"; break;
+            default: error_msg = "unknown error"; break;
+        }
+        
+        DEBUG_PRINT(1, "[WIFI] Intento %d falló después de %lu ms: %d (%s)\n", 
+                    attempt, elapsed, result, error_msg);
+        
+        if (attempt < max_attempts) {
+            DEBUG_PRINT(1, "[WIFI] Esperando 3 segundos antes de reintentar...\n");
+            sleep_ms(3000);
+        }
     }
     
-    uint32_t elapsed = to_ms_since_boot(get_absolute_time()) - start_time;
-    DEBUG_PRINT(2, "[WIFI] Conectado en %lu ms\n", elapsed);
-    
-    // Imprimir información de la conexión
-    uint8_t mac[6];
-    cyw43_wifi_get_mac(&cyw43_state, CYW43_ITF_STA, mac);
-    DEBUG_PRINT(2, "[WIFI] MAC: %02X:%02X:%02X:%02X:%02X:%02X\n",
-                mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
-    
-    return true;
+    DEBUG_PRINT(0, "[ERROR] No se pudo conectar después de %d intentos\n", max_attempts);
+    return false;
 }
 
 /**
