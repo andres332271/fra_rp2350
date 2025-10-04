@@ -1,0 +1,58 @@
+commit ba6b9e09b8dec2379fb2c33ca82f21a70db84243
+Author: andres-villarreal <andresvillarreal271@gmail.com>
+Date:   Fri Oct 3 16:07:09 2025 -0300
+
+    fix(wifi): solucionar fallo de conexión del CYW43 en Pico 2 W
+    
+    - Reemplazar cyw43_arch_init() por cyw43_arch_init_with_country(CYW43_COUNTRY_WORLDWIDE)
+    - Agregar delay de 1000ms después de inicialización del CYW43
+    - Agregar delay de 500ms después de habilitar modo estación
+    - Implementar sistema de reintentos (3 intentos) con mensajes de diagnóstico
+    - Aumentar timeout de conexión de 10s a 20s
+    - Agregar identificación específica de errores CYW43 (LINK_FAIL, LINK_NONET, LINK_BADAUTH)
+    
+    El chip CYW43 requiere configuración de país/región para acceder a todos los canales WiFi
+    disponibles. Los delays adicionales permiten estabilización del hardware antes de intentar
+    la conexión. El sistema de reintentos maneja la variabilidad natural de conexiones WiFi
+    (tiempos observados entre 300ms y 12s).
+    
+    Fixes: Error -2 (CYW43_LINK_NONET) en conexión WiFi inicial
+
+commit 478d0f6a792061c87a029a4972ec8a5d7ae33a0e
+Author: andres-villarreal <andresvillarreal271@gmail.com>
+Date:   Fri Oct 3 14:13:13 2025 -0300
+
+    feat: agregar script de reinicio y monitoreo serial
+    - Implementar reset_and_monitor.sh para capturar mensajes desde el inicio
+    - Documentar en docs/reset_and_monitor
+
+commit adead5499793f3fcf04d676ff468408a17b29be9
+Author: andres-villarreal <andresvillarreal271@gmail.com>
+Date:   Thu Oct 2 17:01:15 2025 -0300
+
+    feat: agregar script automatizado de flasheo
+    
+    - Implementar flash_pico.sh con picotool
+    - Verificar integridad y detectar binarios idénticos
+    - Confirmación interactiva para evitar flasheos innecesarios
+    - Eliminar necesidad de BOOTSEL manual
+    - Documentar en docs/flash_pico.md
+
+commit d2ad2af34afbf6aeb84c43d56f44785abf43568d
+Author: andres-villarreal <andresvillarreal271@gmail.com>
+Date:   Wed Oct 1 16:36:10 2025 -0300
+
+    chore: primera versión compilable para Pico 2 W
+    
+    - Configurar CMake para pico2_w (RP2350)
+    - Agregar lwipopts.h para lwIP threadsafe_background
+    - Organizar headers en directorio include/
+    - Corregir includes faltantes (stdlib.h, math.h)
+    - Renombrar funciones MQTT para evitar conflicto con SDK
+    - Build exitoso: 383KB binary
+
+commit fe71acf990b278e0bbd885803a7818b99bed5cdd
+Author: andres-villarreal <andresvillarreal271@gmail.com>
+Date:   Tue Sep 30 17:53:11 2025 -0300
+
+    Inicialización del repositorio y estructura jerarquica
